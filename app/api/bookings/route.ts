@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { getAdminFromCookies } from '@/lib/auth'
+import { getSetting } from '@/lib/settings'
 
 const HOLD_MINUTES = 30
 
@@ -68,7 +69,6 @@ export async function POST(req: NextRequest) {
 
   const status = paymentType === 'transfer' ? 'pending_transfer' : 'pending_mp'
 
-  const { getSetting } = await import('@/lib/settings')
   const feeKey = paymentType === 'transfer' ? 'consultation_fee' : 'consultation_fee_mp'
   const feeRaw = await getSetting(feeKey)
   const amount = parseFloat(feeRaw || process.env.NEXT_PUBLIC_CONSULTATION_FEE || '5000')
