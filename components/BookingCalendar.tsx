@@ -164,7 +164,7 @@ export function BookingCalendar() {
             body: JSON.stringify({ bookingId: booking.id }),
           })
           const mp = await mpRes.json()
-          if (!mpRes.ok) { setPayError(mp.error || 'Error al conectar con Mercado Pago'); setStep('payment'); return }
+          if (!mpRes.ok) { setFormError(mp.error || 'Error al conectar con Mercado Pago'); return }
           window.location.href = mp.initPoint
         }
       }
