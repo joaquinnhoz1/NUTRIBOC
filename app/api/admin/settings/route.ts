@@ -54,6 +54,7 @@ export async function PUT(req: NextRequest) {
     'transfer_titular',
     'transfer_banco',
     'consultation_fee',
+    'consultation_fee_mp',
     'mp_link',
     'slots_presencial',
     'slots_online',

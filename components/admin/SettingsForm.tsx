@@ -20,6 +20,7 @@ export function SettingsForm({ settings }: Props) {
   const [titular, setTitular] = useState(settings.transfer_titular || '')
   const [banco, setBanco] = useState(settings.transfer_banco || '')
   const [fee, setFee] = useState(settings.consultation_fee || '5000')
+  const [feeMp, setFeeMp] = useState(settings.consultation_fee_mp || settings.consultation_fee || '5000')
 
   // Mercado Pago
   const [mpLink, setMpLink] = useState(settings.mp_link || '')
@@ -67,6 +68,7 @@ export function SettingsForm({ settings }: Props) {
         transfer_titular: titular,
         transfer_banco: banco,
         consultation_fee: fee,
+        consultation_fee_mp: feeMp,
       }),
     })
     setSavingBank(false)
@@ -185,11 +187,22 @@ export function SettingsForm({ settings }: Props) {
               <input value={banco} onChange={e => setBanco(e.target.value)} placeholder="Banco Nación / Galicia…" className="adm-input" />
             </div>
             <div className="adm-filter-group">
-              <label>Precio de la consulta ($)</label>
+              <label>Precio — Transferencia ($)</label>
               <input
                 type="number"
                 value={fee}
                 onChange={e => setFee(e.target.value)}
+                placeholder="5000"
+                className="adm-input"
+                min="0"
+              />
+            </div>
+            <div className="adm-filter-group">
+              <label>Precio — Mercado Pago ($)</label>
+              <input
+                type="number"
+                value={feeMp}
+                onChange={e => setFeeMp(e.target.value)}
                 placeholder="5000"
                 className="adm-input"
                 min="0"

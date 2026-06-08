@@ -11,6 +11,7 @@ export async function GET() {
     transfer_titular: all.transfer_titular,
     transfer_banco: all.transfer_banco,
     consultation_fee: all.consultation_fee,
+    consultation_fee_mp: all.consultation_fee_mp,
     mp_link: all.mp_link,
   })
 }

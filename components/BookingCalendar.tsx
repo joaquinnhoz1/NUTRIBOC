@@ -25,6 +25,7 @@ interface SiteSettings {
   transfer_titular: string
   transfer_banco: string
   consultation_fee: string
+  consultation_fee_mp: string
   mp_link: string
 }
 
@@ -35,6 +36,7 @@ const DEFAULT_SETTINGS: SiteSettings = {
   transfer_titular: 'Brenda Coloccini',
   transfer_banco: '',
   consultation_fee: '5000',
+  consultation_fee_mp: '5000',
   mp_link: '',
 }
 
@@ -284,13 +286,14 @@ export function BookingCalendar() {
           <p className="bk-pay-options-label">¿Cómo querés pagar?</p>
           <div className="bk-pay-btns">
             <button className="bk-pay-btn bk-pay-transfer" onClick={() => handleFormSubmit('transfer')} disabled={loadingPay}>
-              {loadingPay ? 'Un momento…' : '🏦 Transferencia bancaria'}
+              <span>{loadingPay ? 'Un momento…' : '🏦 Transferencia bancaria'}</span>
+              <span className="bk-pay-btn-price">$ {parseInt(settings.consultation_fee).toLocaleString('es-AR')}</span>
             </button>
             <button className="bk-pay-btn bk-pay-mp" onClick={() => handleFormSubmit('mercadopago')} disabled={loadingPay}>
-              {loadingPay ? 'Un momento…' : '💳 Mercado Pago'}
+              <span>{loadingPay ? 'Un momento…' : '💳 Mercado Pago'}</span>
+              <span className="bk-pay-btn-price">$ {parseInt(settings.consultation_fee_mp || settings.consultation_fee).toLocaleString('es-AR')}</span>
             </button>
           </div>
-          <p className="bk-pay-fee">Monto: <strong>$ {parseInt(settings.consultation_fee).toLocaleString('es-AR')}</strong></p>
         </div>
       </div>
     )

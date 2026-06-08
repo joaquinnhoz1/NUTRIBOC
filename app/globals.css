@@ -481,6 +481,8 @@ header.scrolled {
 .bk-pay-transfer:hover:not(:disabled) { border-color: var(--tostado); background: #fdf9f4 }
 .bk-pay-mp:hover:not(:disabled) { border-color: #009ee3; background: #f0f8ff }
 .bk-pay-fee { font-size: 13.5px; color: var(--ink-soft); text-align: center }
+.bk-pay-btn { flex-direction: column; gap: 4px }
+.bk-pay-btn-price { font-size: 13px; font-weight: 700; color: var(--olive-dk); opacity: .85 }
 .bk-pay-fee strong { color: var(--olive-dk) }
 .bk-success { text-align: center; padding: 48px 36px }
 .bk-success-icon {
@@ -631,6 +633,25 @@ footer { background: var(--ink); color: #C9C2B3; padding: 64px 0 30px }
   .steps { grid-template-columns: 1fr; gap: 30px }
   .foot-grid { grid-template-columns: 1fr }
   .bk { padding: 22px }
-  .floatfood { transform: scale(.7) }
-  .f1 { left: -2% } .f2 { right: -2% } .f3 { left: 0 } .f4 { right: 0 }
+
+  /* Hero mobile */
+  .hero { padding: 100px 0 70px }
+  .hero-inner { padding: 0 22px }
+  .hero .eyebrow {
+    font-size: 10px;
+    letter-spacing: .16em;
+    line-height: 1.6;
+  }
+  .hero h1 { font-size: clamp(46px, 13vw, 72px) }
+  .hero .role { font-size: 16px }
+  .hero-lead { font-size: 16px; max-width: 100% }
+  .hero-actions { gap: 10px }
+  .hero-actions .btn { font-size: 14px; padding: 13px 24px }
+
+  /* Alimentos flotantes: más pequeños y fuera del área de texto */
+  .floatfood { transform: scale(.6); opacity: .7 }
+  .f1 { top: 10%; left: -4% }
+  .f2 { top: 12%; right: -4% }
+  .f3 { bottom: 22%; left: -2% }
+  .f4 { bottom: 18%; right: -2% }
 }
