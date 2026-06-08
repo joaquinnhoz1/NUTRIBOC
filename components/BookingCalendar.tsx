@@ -289,10 +289,12 @@ export function BookingCalendar() {
               <span>{loadingPay ? 'Un momento…' : '🏦 Transferencia bancaria'}</span>
               <span className="bk-pay-btn-price">$ {parseInt(settings.consultation_fee).toLocaleString('es-AR')}</span>
             </button>
-            <button className="bk-pay-btn bk-pay-mp" onClick={() => handleFormSubmit('mercadopago')} disabled={loadingPay}>
-              <span>{loadingPay ? 'Un momento…' : '💳 Mercado Pago'}</span>
-              <span className="bk-pay-btn-price">$ {parseInt(settings.consultation_fee_mp || settings.consultation_fee).toLocaleString('es-AR')}</span>
-            </button>
+            {settings.mp_link && (
+              <button className="bk-pay-btn bk-pay-mp" onClick={() => handleFormSubmit('mercadopago')} disabled={loadingPay}>
+                <span>{loadingPay ? 'Un momento…' : '💳 Mercado Pago'}</span>
+                <span className="bk-pay-btn-price">$ {parseInt(settings.consultation_fee_mp || settings.consultation_fee).toLocaleString('es-AR')}</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
