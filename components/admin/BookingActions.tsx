@@ -1,10 +1,11 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 const MONTHS = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
 const WA = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '542314541335'
+const DELETE_AFTER = 30 // segundos
 
 interface Props {
   booking: {
@@ -21,8 +22,38 @@ interface Props {
 export function BookingActions({ booking }: Props) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [countdown, setCountdown] = useState<number | null>(
+    booking.status === 'cancelled' ? DELETE_AFTER : null
+  )
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const deleteRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    if (booking.status !== 'cancelled') return
+
+    // Countdown tick
+    timerRef.current = setInterval(() => {
+      setCountdown(s => (s !== null ? s - 1 : null))
+    }, 1000)
+
+    // Auto-borrar al llegar a 0
+    deleteRef.current = setTimeout(async () => {
+      await fetch(`/api/bookings/${booking.id}`, { method: 'DELETE' })
+      router.refresh()
+    }, DELETE_AFTER * 1000)
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current)
+      if (deleteRef.current) clearTimeout(deleteRef.current)
+    }
+  }, [booking.status, booking.id, router])
 
   async function updateStatus(status: string) {
+    // Si restauramos, cancelamos el auto-borrado
+    if (timerRef.current) clearInterval(timerRef.current)
+    if (deleteRef.current) clearTimeout(deleteRef.current)
+    setCountdown(null)
+
     setLoading(true)
     await fetch(`/api/bookings/${booking.id}`, {
       method: 'PATCH',
@@ -58,8 +89,13 @@ export function BookingActions({ booking }: Props) {
         </button>
       )}
       {booking.status === 'cancelled' && (
-        <button className="adm-btn-ghost" onClick={() => updateStatus('confirmed')} disabled={loading} style={{ fontSize: 12, padding: '6px 12px' }}>
-          Restaurar
+        <button
+          className="adm-btn-ghost"
+          onClick={() => updateStatus('confirmed')}
+          disabled={loading}
+          style={{ fontSize: 12, padding: '6px 12px', borderColor: countdown !== null && countdown <= 10 ? '#e65100' : undefined, color: countdown !== null && countdown <= 10 ? '#e65100' : undefined }}
+        >
+          Restaurar {countdown !== null ? `(${countdown}s)` : ''}
         </button>
       )}
       <button

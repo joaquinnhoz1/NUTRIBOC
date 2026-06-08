@@ -33,6 +33,6 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   if (!isAdmin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { id } = await params
-  await prisma.booking.update({ where: { id }, data: { status: 'cancelled' } })
+  await prisma.booking.delete({ where: { id } })
   return NextResponse.json({ ok: true })
 }
