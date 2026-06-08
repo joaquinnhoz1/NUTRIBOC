@@ -12,6 +12,7 @@ export const SETTING_KEYS = [
   'mp_link',
   'slots_presencial',
   'slots_online',
+  'min_days_ahead',
 ] as const
 
 export type SettingKey = typeof SETTING_KEYS[number]
@@ -28,6 +29,7 @@ const ENV_DEFAULTS: Record<string, string> = {
   mp_link: '',
   slots_presencial: '["09:00","10:00","11:00","12:00","15:00","16:00","17:00","18:00"]',
   slots_online: '["08:00","09:00","13:00","14:00","19:00","20:00"]',
+  min_days_ahead: '1',
 }
 
 export async function getSettings(): Promise<Record<string, string>> {

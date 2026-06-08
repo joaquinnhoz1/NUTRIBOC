@@ -58,6 +58,7 @@ export async function PUT(req: NextRequest) {
     'mp_link',
     'slots_presencial',
     'slots_online',
+    'min_days_ahead',
   ]
 
   const toSave: Record<string, string> = {}

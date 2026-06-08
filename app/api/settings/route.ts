@@ -13,5 +13,6 @@ export async function GET() {
     consultation_fee: all.consultation_fee,
     consultation_fee_mp: all.consultation_fee_mp,
     mp_link: all.mp_link,
+    min_days_ahead: all.min_days_ahead,
   })
 }

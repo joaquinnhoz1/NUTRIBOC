@@ -22,6 +22,12 @@ export function SettingsForm({ settings }: Props) {
   const [fee, setFee] = useState(settings.consultation_fee || '5000')
   const [feeMp, setFeeMp] = useState(settings.consultation_fee_mp || settings.consultation_fee || '5000')
 
+  // Agenda
+  const [minDaysAhead, setMinDaysAhead] = useState(settings.min_days_ahead || '1')
+  const [savingAgenda, setSavingAgenda] = useState(false)
+  const [msgAgenda, setMsgAgenda] = useState('')
+  const [errAgenda, setErrAgenda] = useState('')
+
   // Mercado Pago
   const [mpLink, setMpLink] = useState(settings.mp_link || '')
   const [savingMp, setSavingMp] = useState(false)
@@ -74,6 +80,19 @@ export function SettingsForm({ settings }: Props) {
     setSavingBank(false)
     if (res.ok) { setMsgBank('Guardado correctamente'); router.refresh() }
     else setErrBank('Error al guardar')
+  }
+
+  async function saveAgenda(e: React.FormEvent) {
+    e.preventDefault()
+    setSavingAgenda(true); setMsgAgenda(''); setErrAgenda('')
+    const res = await fetch('/api/admin/settings', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ min_days_ahead: minDaysAhead }),
+    })
+    setSavingAgenda(false)
+    if (res.ok) { setMsgAgenda('Guardado correctamente'); router.refresh() }
+    else setErrAgenda('Error al guardar')
   }
 
   async function saveMp(e: React.FormEvent) {
@@ -215,6 +234,39 @@ export function SettingsForm({ settings }: Props) {
             </button>
             {msgBank && <span className="adm-msg-ok">✓ {msgBank}</span>}
             {errBank && <span className="adm-error" style={{ display: 'inline' }}>{errBank}</span>}
+          </div>
+        </form>
+      </div>
+
+      {/* ── Agenda ── */}
+      <div className="adm-card">
+        <h2>📅 Agenda</h2>
+        <p style={{ fontSize: 13.5, color: '#5C584B', marginBottom: 22 }}>
+          Configurá con cuántos días de anticipación mínima se puede reservar un turno.
+        </p>
+        <form onSubmit={saveAgenda}>
+          <div className="adm-filter-group" style={{ maxWidth: 320 }}>
+            <label>Días mínimos de anticipación</label>
+            <input
+              type="number"
+              value={minDaysAhead}
+              onChange={e => setMinDaysAhead(e.target.value)}
+              min="0"
+              max="30"
+              className="adm-input"
+            />
+            <span style={{ fontSize: 12, color: '#8a8780' }}>
+              {minDaysAhead === '0' ? 'El paciente puede reservar para hoy mismo.' :
+               minDaysAhead === '1' ? 'El paciente puede reservar a partir de mañana.' :
+               `El paciente puede reservar con ${minDaysAhead} días de anticipación mínima.`}
+            </span>
+          </div>
+          <div className="adm-settings-actions" style={{ marginTop: 16 }}>
+            <button type="submit" className="adm-btn-primary" disabled={savingAgenda}>
+              {savingAgenda ? 'Guardando…' : 'Guardar'}
+            </button>
+            {msgAgenda && <span className="adm-msg-ok">✓ {msgAgenda}</span>}
+            {errAgenda && <span className="adm-error" style={{ display: 'inline' }}>{errAgenda}</span>}
           </div>
         </form>
       </div>

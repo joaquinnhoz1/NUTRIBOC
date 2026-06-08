@@ -27,6 +27,7 @@ interface SiteSettings {
   consultation_fee: string
   consultation_fee_mp: string
   mp_link: string
+  min_days_ahead: string
 }
 
 const DEFAULT_SETTINGS: SiteSettings = {
@@ -38,6 +39,7 @@ const DEFAULT_SETTINGS: SiteSettings = {
   consultation_fee: '5000',
   consultation_fee_mp: '5000',
   mp_link: '',
+  min_days_ahead: '1',
 }
 
 export function BookingCalendar() {
@@ -119,11 +121,13 @@ export function BookingCalendar() {
     for (let d = 1; d <= daysInMonth; d++) {
       const date = new Date(view.getFullYear(), view.getMonth(), d)
       const isSunday = date.getDay() === 0
-      const isPast = date < today
-      cells.push({ day: d, disabled: isPast || isSunday, selected: selectedDate ? sameDay(date, selectedDate) : false })
+      const minDays = parseInt(settings.min_days_ahead) || 1
+      const minDate = new Date(today); minDate.setDate(today.getDate() + minDays)
+      const isTooSoon = date < minDate
+      cells.push({ day: d, disabled: isTooSoon || isSunday, selected: selectedDate ? sameDay(date, selectedDate) : false })
     }
     return cells
-  }, [view, today, selectedDate])
+  }, [view, today, selectedDate, settings.min_days_ahead])
 
   function handleContinue() {
     if (!selectedDate || !selectedSlot) return
