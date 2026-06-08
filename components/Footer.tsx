@@ -1,0 +1,47 @@
+import Image from 'next/image'
+import { getSetting } from '@/lib/settings'
+
+function formatPhoneDisplay(number: string) {
+  const digits = number.replace(/\D/g, '')
+  const local = digits.startsWith('54') ? digits.slice(2) : digits
+  if (local.length === 10) return `${local.slice(0, 4)} ${local.slice(4)}`
+  return local
+}
+
+export async function Footer() {
+  const waNumber = await getSetting('whatsapp_number')
+
+  return (
+    <footer>
+      <div className="wrap">
+        <div className="foot-grid">
+          <div className="foot-brand">
+            <Image src="/nutriboc-white.png" alt="NUTRIBOC" height={48} width={66} style={{ height: 48, width: 'auto' }} />
+            <p>
+              Nut. Brenda Coloccini — Licenciada en Nutrición. MN 13985 · MP 8362.
+              Acompañamiento nutricional con calidez y profesionalismo.
+            </p>
+          </div>
+          <div className="foot-col">
+            <h4>Navegación</h4>
+            <a href="#como">Cómo funciona</a>
+            <a href="#agenda">Agenda de turnos</a>
+            <a href="#pagos">Formas de pago</a>
+          </div>
+          <div className="foot-col">
+            <h4>Contacto</h4>
+            <a href={`https://wa.me/${waNumber.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer">
+              WhatsApp {formatPhoneDisplay(waNumber)}
+            </a>
+            <a href="#pagos">Formas de pago</a>
+            <a href="#agenda">Reservar turno</a>
+          </div>
+        </div>
+        <div className="foot-bottom">
+          <span>© 2026 Brenda Coloccini · NUTRIBOC. Todos los derechos reservados.</span>
+          <span>MN 13985 · MP 8362</span>
+        </div>
+      </div>
+    </footer>
+  )
+}

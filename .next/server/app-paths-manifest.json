@@ -1,0 +1,7 @@
+{
+  "/api/bookings/[id]/route": "app/api/bookings/[id]/route.js",
+  "/admin/page": "app/admin/page.js",
+  "/admin/bookings/page": "app/admin/bookings/page.js",
+  "/admin/schedule/page": "app/admin/schedule/page.js",
+  "/admin/settings/page": "app/admin/settings/page.js"
+}
