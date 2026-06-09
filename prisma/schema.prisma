@@ -23,6 +23,7 @@ model Booking {
   amount         Float?
   notes          String?
   expiresAt      DateTime?
+  cancelledAt    DateTime?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 

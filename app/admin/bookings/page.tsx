@@ -138,7 +138,7 @@ export default async function BookingsPage({
                     <td><span className={`badge badge-${b.status}`}>{STATUS_LABELS[b.status] || b.status}</span></td>
                     <td>{b.amount ? `$${b.amount.toLocaleString('es-AR')}` : '—'}</td>
                     <td>
-                      <BookingActions booking={{ id: b.id, status: b.status, phone: b.phone, name: b.name, date: b.date, slot: b.slot, mode: b.mode }} />
+                      <BookingActions booking={{ id: b.id, status: b.status, phone: b.phone, name: b.name, date: b.date, slot: b.slot, mode: b.mode, cancelledAt: b.cancelledAt?.toISOString() ?? null }} />
                     </td>
                   </tr>
                 )

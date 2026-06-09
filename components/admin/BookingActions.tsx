@@ -15,39 +15,53 @@ interface Props {
     date: string
     slot: string
     mode: string
+    cancelledAt: string | null
   }
 }
 
 export function BookingActions({ booking }: Props) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
-  const [countdown, setCountdown] = useState<number | null>(
-    booking.status === 'cancelled' ? DELETE_AFTER : null
-  )
+  function calcRemaining(): number | null {
+    if (booking.status !== 'cancelled' || !booking.cancelledAt) return null
+    const elapsed = Math.floor((Date.now() - new Date(booking.cancelledAt).getTime()) / 1000)
+    return Math.max(0, DELETE_AFTER - elapsed)
+  }
+
+  const [countdown, setCountdown] = useState<number | null>(calcRemaining)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const deleteRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     if (booking.status !== 'cancelled') return
 
-    setCountdown(DELETE_AFTER)
+    const remaining = calcRemaining()
 
-    // Countdown tick
+    // Ya expiró mientras estábamos fuera — borrar de inmediato
+    if (remaining !== null && remaining <= 0) {
+      fetch(`/api/bookings/${booking.id}`, { method: 'DELETE' }).then(() => router.refresh())
+      return
+    }
+
+    if (remaining === null) return
+
+    setCountdown(remaining)
+
     timerRef.current = setInterval(() => {
       setCountdown(s => (s !== null ? s - 1 : null))
     }, 1000)
 
-    // Auto-borrar al llegar a 0
     deleteRef.current = setTimeout(async () => {
       await fetch(`/api/bookings/${booking.id}`, { method: 'DELETE' })
       router.refresh()
-    }, DELETE_AFTER * 1000)
+    }, remaining * 1000)
 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current)
       if (deleteRef.current) clearTimeout(deleteRef.current)
     }
-  }, [booking.status, booking.id, router])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [booking.status, booking.id, booking.cancelledAt, router])
 
   async function updateStatus(status: string) {
     // Si restauramos, cancelamos el auto-borrado

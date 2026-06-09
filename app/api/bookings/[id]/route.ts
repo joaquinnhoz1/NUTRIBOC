@@ -20,8 +20,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     data: {
       ...(status && { status }),
       ...(notes !== undefined && { notes }),
-      // Al confirmar, el turno queda fijo y no expira
-      ...(status === 'confirmed' && { expiresAt: null }),
+      ...(status === 'confirmed' && { expiresAt: null, cancelledAt: null }),
+      ...(status === 'cancelled' && { cancelledAt: new Date() }),
     },
   })
 
