@@ -639,9 +639,8 @@ footer { background: var(--dark); color: #C9C2B3; padding: 64px 0 30px }
 
   /* Hero mobile */
   .hero { padding: 100px 0 70px }
-  .hero-inner { grid-template-columns: 1fr; gap: 36px }
-  .hero-visual { order: -1 }
-  .hero-arch { max-width: 260px; margin: 0 auto; aspect-ratio: 1 / 1.1 }
+  .hero-inner { grid-template-columns: 1fr; gap: 0 }
+  .hero-visual { display: none }
   .hero h1 { font-size: clamp(38px, 12vw, 60px) }
   .hero-lead { font-size: 16px; max-width: 100% }
   .hero-actions { gap: 10px }
