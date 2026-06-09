@@ -321,8 +321,105 @@
 .adm-input:focus { outline: none; border-color: #6E7B52; background: #fff }
 .adm-input::placeholder { color: #b0ac9f }
 
+/* Mobile top bar */
+.adm-mobile-header {
+  display: none;
+}
+
+/* Mobile bottom nav */
+.adm-mobile-nav {
+  display: none;
+}
+
 @media (max-width: 768px) {
   .adm-sidebar { display: none }
-  .adm-main { padding: 20px 16px }
+
+  /* Top bar */
+  .adm-mobile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    background: #1e1e1e;
+    padding: 0 16px;
+    z-index: 100;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+  .adm-mobile-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #e0ddd7;
+  }
+  .adm-mobile-logo .mark {
+    width: 30px; height: 30px; border-radius: 7px;
+    background: #6E7B52; color: #fff;
+    font-size: 12px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .adm-mobile-logo span {
+    font-size: 13px; font-weight: 600; color: #e0ddd7; line-height: 1.2;
+  }
+  .adm-mobile-logo small {
+    display: block; font-size: 10px; color: #938C7D; font-weight: 400;
+  }
+  .adm-mobile-logout {
+    background: none;
+    border: 1px solid rgba(255,255,255,.15);
+    border-radius: 8px;
+    padding: 7px 10px;
+    color: #938C7D;
+    cursor: pointer;
+    display: flex; align-items: center;
+    transition: .15s;
+  }
+  .adm-mobile-logout:hover { color: #e0ddd7; border-color: rgba(255,255,255,.3) }
+
+  /* Bottom nav */
+  .adm-mobile-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: #1e1e1e;
+    border-top: 1px solid rgba(255,255,255,.08);
+    z-index: 100;
+  }
+  .adm-mobile-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    color: #938C7D;
+    text-decoration: none;
+    font-size: 10px;
+    font-weight: 500;
+    transition: .15s;
+    padding: 6px 4px;
+  }
+  .adm-mobile-nav-item svg { width: 20px; height: 20px }
+  .adm-mobile-nav-item span { font-size: 9.5px; text-align: center; line-height: 1.1 }
+  .adm-mobile-nav-item.active { color: #DFE5D1 }
+  .adm-mobile-nav-item.active svg { color: #8fa85c }
+
+  /* Shell ocupa todo el ancho sin sidebar */
+  .adm-shell { display: block }
+
+  /* Main content offset for fixed bars */
+  .adm-main {
+    padding: 20px 16px;
+    padding-top: calc(56px + 20px);
+    padding-bottom: calc(60px + 16px);
+  }
+
   .adm-stats { grid-template-columns: 1fr 1fr }
 }

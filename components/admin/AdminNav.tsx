@@ -20,25 +20,49 @@ export function AdminNav() {
   }
 
   return (
-    <aside className="adm-sidebar">
-      <div className="adm-sidebar-logo">
-        <div className="mark">NB</div>
-        <span>Nutri.bcg<small>Panel Admin</small></span>
-      </div>
-      <nav className="adm-nav">
-        <div className="adm-nav-label">Menú</div>
+    <>
+      {/* Desktop sidebar */}
+      <aside className="adm-sidebar">
+        <div className="adm-sidebar-logo">
+          <div className="mark">NB</div>
+          <span>Nutri.bcg<small>Panel Admin</small></span>
+        </div>
+        <nav className="adm-nav">
+          <div className="adm-nav-label">Menú</div>
+          {links.map(l => (
+            <Link key={l.href} href={l.href} className={pathname === l.href ? 'active' : ''}>
+              {l.icon}{l.label}
+            </Link>
+          ))}
+        </nav>
+        <div className="adm-sidebar-footer">
+          <button className="adm-logout-btn" onClick={logout}>
+            <LogoutIcon /> Cerrar sesión
+          </button>
+        </div>
+      </aside>
+
+      {/* Mobile top bar */}
+      <header className="adm-mobile-header">
+        <div className="adm-mobile-logo">
+          <div className="mark">NB</div>
+          <span>Nutri.bcg <small>Admin</small></span>
+        </div>
+        <button className="adm-mobile-logout" onClick={logout} aria-label="Cerrar sesión">
+          <LogoutIcon />
+        </button>
+      </header>
+
+      {/* Mobile bottom nav */}
+      <nav className="adm-mobile-nav">
         {links.map(l => (
-          <Link key={l.href} href={l.href} className={pathname === l.href ? 'active' : ''}>
-            {l.icon}{l.label}
+          <Link key={l.href} href={l.href} className={`adm-mobile-nav-item${pathname === l.href ? ' active' : ''}`}>
+            {l.icon}
+            <span>{l.label}</span>
           </Link>
         ))}
       </nav>
-      <div className="adm-sidebar-footer">
-        <button className="adm-logout-btn" onClick={logout}>
-          <LogoutIcon /> Cerrar sesión
-        </button>
-      </div>
-    </aside>
+    </>
   )
 }
 
