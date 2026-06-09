@@ -23,12 +23,8 @@ export default async function AdminDashboard() {
   const in7 = new Date(); in7.setDate(in7.getDate() + 7)
   const weekDate = in7.toISOString().split('T')[0]
 
-  const [total, confirmed, pendingTransfer, pendingMp, cancelled, upcoming, revenue] = await Promise.all([
-    prisma.booking.count(),
-    prisma.booking.count({ where: { status: 'confirmed' } }),
-    prisma.booking.count({ where: { status: 'pending_transfer' } }),
-    prisma.booking.count({ where: { status: 'pending_mp' } }),
-    prisma.booking.count({ where: { status: 'cancelled' } }),
+  const [statusCounts, upcoming, revenue] = await Promise.all([
+    prisma.booking.groupBy({ by: ['status'], _count: true }),
     prisma.booking.findMany({
       where: { date: { gte: today, lte: weekDate }, status: { not: 'cancelled' } },
       orderBy: [{ date: 'asc' }, { slot: 'asc' }],
@@ -36,6 +32,13 @@ export default async function AdminDashboard() {
     }),
     prisma.booking.aggregate({ where: { status: 'confirmed' }, _sum: { amount: true } }),
   ])
+
+  const countByStatus = Object.fromEntries(statusCounts.map(r => [r.status, r._count]))
+  const total = statusCounts.reduce((s, r) => s + r._count, 0)
+  const confirmed = countByStatus['confirmed'] ?? 0
+  const pendingTransfer = countByStatus['pending_transfer'] ?? 0
+  const pendingMp = countByStatus['pending_mp'] ?? 0
+  const cancelled = countByStatus['cancelled'] ?? 0
 
   const todayBookings = upcoming.filter(b => b.date === today)
 
