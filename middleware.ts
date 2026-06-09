@@ -1,7 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { jwtVerify } from 'jose'
 
-const secret = () => new TextEncoder().encode(process.env.JWT_SECRET || 'dev-secret-change-in-production')
+const secret = () => {
+  const key = process.env.JWT_SECRET
+  if (!key) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('JWT_SECRET env var is required in production')
+    }
+    return new TextEncoder().encode('dev-secret-local-only-never-in-prod')
+  }
+  return new TextEncoder().encode(key)
+}
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl

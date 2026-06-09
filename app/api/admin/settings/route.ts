@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSettings, setSettings, getAdminPassword } from '@/lib/settings'
-import { getAdminFromCookies, signAdminToken } from '@/lib/auth'
+import { getAdminFromCookies, signAdminToken, verifyPassword, hashPassword } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 
 export async function GET() {
@@ -20,17 +20,19 @@ export async function PUT(req: NextRequest) {
   // Handle password change separately
   if (body._changePassword) {
     const { currentPassword, newPassword } = body
-    const expected = await getAdminPassword()
-    if (currentPassword !== expected) {
+    const stored = await getAdminPassword()
+    const { match } = await verifyPassword(currentPassword, stored)
+    if (!match) {
       return NextResponse.json({ error: 'La contraseña actual es incorrecta' }, { status: 400 })
     }
     if (!newPassword || newPassword.length < 6) {
       return NextResponse.json({ error: 'La nueva contraseña debe tener al menos 6 caracteres' }, { status: 400 })
     }
+    const hashed = await hashPassword(newPassword)
     await prisma.setting.upsert({
       where: { key: 'admin_password' },
-      update: { value: newPassword },
-      create: { key: 'admin_password', value: newPassword },
+      update: { value: hashed },
+      create: { key: 'admin_password', value: hashed },
     })
     // Issue a new token so the session stays valid
     const token = await signAdminToken()
