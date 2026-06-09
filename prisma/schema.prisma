@@ -9,7 +9,7 @@ datasource db {
 }
 
 model Booking {
-  id             String   @id @default(cuid())
+  id             String    @id @default(cuid())
   name           String
   email          String
   phone          String
@@ -17,14 +17,18 @@ model Booking {
   date           String
   slot           String
   paymentType    String
-  status         String   @default("pending")
+  status         String    @default("pending")
   mpPaymentId    String?
   mpPreferenceId String?
   amount         Float?
   notes          String?
   expiresAt      DateTime?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([date, mode])
+  @@index([status])
+  @@index([expiresAt])
 }
 
 model BlockedSlot {

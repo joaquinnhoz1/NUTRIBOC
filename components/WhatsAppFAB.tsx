@@ -1,8 +1,12 @@
-export function WhatsAppFAB() {
+import { getSetting } from '@/lib/settings'
+
+export async function WhatsAppFAB() {
+  const phone = await getSetting('whatsapp_number')
+
   return (
     <a
       className="fab"
-      href="https://wa.me/542314541335"
+      href={`https://wa.me/${phone}`}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="WhatsApp"

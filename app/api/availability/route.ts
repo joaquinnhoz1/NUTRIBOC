@@ -15,67 +15,69 @@ function parseSlots(raw: string, fallback: string[]): string[] {
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
-  const date = searchParams.get('date') // 'YYYY-MM-DD'
-  const mode = searchParams.get('mode') // 'presencial' | 'online'
+  const date = searchParams.get('date')
+  const mode = searchParams.get('mode')
 
   if (!date || !mode) {
     return NextResponse.json({ error: 'date and mode required' }, { status: 400 })
   }
 
-  // Check if the day is fully blocked
-  const blockedDay = await prisma.blockedDay.findUnique({ where: { date } })
-  if (blockedDay) {
-    return NextResponse.json({ blockedDay: true, slots: [] })
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !['presencial', 'online'].includes(mode)) {
+    return NextResponse.json({ error: 'Parámetros inválidos' }, { status: 400 })
   }
 
-  const [rawPresencial, rawOnline] = await Promise.all([
-    getSetting('slots_presencial'),
-    getSetting('slots_online'),
-  ])
+  try {
+    const blockedDay = await prisma.blockedDay.findUnique({ where: { date } })
+    if (blockedDay) {
+      return NextResponse.json({ blockedDay: true, slots: [] })
+    }
 
-  const allSlots = mode === 'online'
-    ? parseSlots(rawOnline, DEFAULT_ONLINE)
-    : parseSlots(rawPresencial, DEFAULT_PRESENCIAL)
+    const [rawPresencial, rawOnline] = await Promise.all([
+      getSetting('slots_presencial'),
+      getSetting('slots_online'),
+    ])
 
-  // Liberar reservas expiradas para esta fecha+modalidad
-  const now = new Date()
-  await prisma.booking.updateMany({
-    where: {
-      date,
-      mode,
-      status: { in: ['pending_transfer', 'pending_mp'] },
-      expiresAt: { not: null, lte: now },
-    },
-    data: { status: 'cancelled' },
-  })
+    const allSlots = mode === 'online'
+      ? parseSlots(rawOnline, DEFAULT_ONLINE)
+      : parseSlots(rawPresencial, DEFAULT_PRESENCIAL)
 
-  // Get blocked slots for this date + mode
-  const blockedSlots = await prisma.blockedSlot.findMany({
-    where: {
-      date,
-      OR: [{ mode }, { mode: 'both' }],
-    },
-  })
+    const now = new Date()
+    await prisma.booking.updateMany({
+      where: {
+        date,
+        mode,
+        status: { in: ['pending_transfer', 'pending_mp'] },
+        expiresAt: { not: null, lte: now },
+      },
+      data: { status: 'cancelled' },
+    })
 
-  const blockedSlotSet = new Set(
-    blockedSlots.flatMap(b => (b.slot === 'all' ? allSlots : [b.slot]))
-  )
+    const [blockedSlots, bookedSlots] = await Promise.all([
+      prisma.blockedSlot.findMany({
+        where: { date, OR: [{ mode }, { mode: 'both' }] },
+      }),
+      prisma.booking.findMany({
+        where: {
+          date,
+          mode,
+          status: { in: ['pending_transfer', 'confirmed', 'pending_mp'] },
+        },
+        select: { slot: true },
+      }),
+    ])
 
-  // Get confirmed/pending bookings for this date + mode
-  const bookedSlots = await prisma.booking.findMany({
-    where: {
-      date,
-      mode,
-      status: { in: ['pending_transfer', 'confirmed', 'pending_mp'] },
-    },
-    select: { slot: true },
-  })
+    const blockedSlotSet = new Set(
+      blockedSlots.flatMap(b => (b.slot === 'all' ? allSlots : [b.slot]))
+    )
+    const bookedSlotSet = new Set(bookedSlots.map(b => b.slot))
 
-  const bookedSlotSet = new Set(bookedSlots.map(b => b.slot))
+    const available = allSlots.filter(
+      slot => !blockedSlotSet.has(slot) && !bookedSlotSet.has(slot)
+    )
 
-  const available = allSlots.filter(
-    slot => !blockedSlotSet.has(slot) && !bookedSlotSet.has(slot)
-  )
-
-  return NextResponse.json({ blockedDay: false, slots: available })
+    return NextResponse.json({ blockedDay: false, slots: available })
+  } catch (err) {
+    console.error('[GET /api/availability]', err)
+    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
+  }
 }

@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation'
 import { useState, useEffect, useRef } from 'react'
 
 const MONTHS = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
-const WA = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '542314541335'
 const DELETE_AFTER = 30 // segundos
 
 interface Props {

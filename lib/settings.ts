@@ -78,5 +78,6 @@ export async function setSettings(data: Record<string, string>): Promise<void> {
 
 export async function getAdminPassword(): Promise<string> {
   const row = await prisma.setting.findUnique({ where: { key: 'admin_password' } })
-  return row?.value ?? process.env.ADMIN_PASSWORD ?? 'nutriboc2026'
+  // No hardcoded fallback — ADMIN_PASSWORD must be set in env if DB has no value yet
+  return row?.value ?? process.env.ADMIN_PASSWORD ?? ''
 }
