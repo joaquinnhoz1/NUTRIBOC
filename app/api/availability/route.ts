@@ -2,15 +2,17 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { getSetting } from '@/lib/settings'
 
-const DEFAULT_PRESENCIAL = ['09:00', '10:00', '11:00', '12:00', '15:00', '16:00', '17:00', '18:00']
-const DEFAULT_ONLINE = ['08:00', '09:00', '13:00', '14:00', '19:00', '20:00']
-
-function parseSlots(raw: string, fallback: string[]): string[] {
+function parseSlots(raw: string): string[] {
   try {
     const parsed = JSON.parse(raw)
-    if (Array.isArray(parsed) && parsed.length > 0) return parsed
+    if (Array.isArray(parsed)) return parsed
   } catch {}
-  return fallback
+  return []
+}
+
+function dowFromDateStr(dateStr: string): number {
+  const [y, m, d] = dateStr.split('-').map(Number)
+  return new Date(y, m - 1, d).getDay()
 }
 
 export async function GET(req: NextRequest) {
@@ -32,14 +34,15 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ blockedDay: true, slots: [] })
     }
 
+    const dow = dowFromDateStr(date)
     const [rawPresencial, rawOnline] = await Promise.all([
-      getSetting('slots_presencial'),
-      getSetting('slots_online'),
+      getSetting(`slots_presencial_${dow}`),
+      getSetting(`slots_online_${dow}`),
     ])
 
     const allSlots = mode === 'online'
-      ? parseSlots(rawOnline, DEFAULT_ONLINE)
-      : parseSlots(rawPresencial, DEFAULT_PRESENCIAL)
+      ? parseSlots(rawOnline)
+      : parseSlots(rawPresencial)
 
     const now = new Date()
     await prisma.booking.updateMany({

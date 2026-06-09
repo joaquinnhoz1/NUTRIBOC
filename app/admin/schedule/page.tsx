@@ -11,24 +11,29 @@ function fmtDate(dateStr: string) {
   return `${d} ${MONTHS[parseInt(m) - 1]} ${y}`
 }
 
-function parseSlots(raw: string, fallback: string[]): string[] {
+function parseSlots(raw: string): string[] {
   try {
     const parsed = JSON.parse(raw)
-    if (Array.isArray(parsed) && parsed.length > 0) return parsed
+    if (Array.isArray(parsed)) return parsed
   } catch {}
-  return fallback
+  return []
 }
 
 export default async function SchedulePage() {
-  const [blockedSlots, blockedDays, rawPresencial, rawOnline] = await Promise.all([
+  const [blockedSlots, blockedDays, ...rawSlots] = await Promise.all([
     prisma.blockedSlot.findMany({ orderBy: { date: 'asc' } }),
     prisma.blockedDay.findMany({ orderBy: { date: 'asc' } }),
-    getSetting('slots_presencial'),
-    getSetting('slots_online'),
+    ...([0,1,2,3,4,5,6].map(d => getSetting(`slots_presencial_${d}`))),
+    ...([0,1,2,3,4,5,6].map(d => getSetting(`slots_online_${d}`))),
   ])
 
-  const slotsPresencial = parseSlots(rawPresencial, ['09:00','10:00','11:00','12:00','15:00','16:00','17:00','18:00'])
-  const slotsOnline = parseSlots(rawOnline, ['08:00','09:00','13:00','14:00','19:00','20:00'])
+  const presencialByDay = Object.fromEntries(
+    [0,1,2,3,4,5,6].map((d, i) => [d, parseSlots(rawSlots[i] as string)])
+  ) as Record<number, string[]>
+
+  const onlineByDay = Object.fromEntries(
+    [0,1,2,3,4,5,6].map((d, i) => [d, parseSlots(rawSlots[7 + i] as string)])
+  ) as Record<number, string[]>
 
   return (
     <>
@@ -38,8 +43,8 @@ export default async function SchedulePage() {
       </div>
 
       <SlotEditor
-        initialPresencial={slotsPresencial}
-        initialOnline={slotsOnline}
+        initialPresencial={presencialByDay}
+        initialOnline={onlineByDay}
       />
 
       <BlockDayManager
