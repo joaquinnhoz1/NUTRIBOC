@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useEffect, useRef } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 
 const links = [
@@ -14,11 +15,31 @@ export function AdminNav() {
   const pathname = usePathname()
   const router = useRouter()
   const isLogin = pathname === '/admin/login'
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const INACTIVITY_MS = 30 * 60 * 1000
 
   async function logout() {
     await fetch('/api/auth/logout', { method: 'POST' })
     router.push('/admin/login')
   }
+
+  useEffect(() => {
+    if (isLogin) return
+
+    function reset() {
+      if (timerRef.current) clearTimeout(timerRef.current)
+      timerRef.current = setTimeout(logout, INACTIVITY_MS)
+    }
+
+    const events = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll', 'click']
+    events.forEach(e => window.addEventListener(e, reset, { passive: true }))
+    reset()
+
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current)
+      events.forEach(e => window.removeEventListener(e, reset))
+    }
+  }, [isLogin])
 
   if (isLogin) return null
 
