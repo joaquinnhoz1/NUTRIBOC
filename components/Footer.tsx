@@ -19,7 +19,7 @@ export async function Footer() {
           <div className="foot-brand">
             <Image src="/nutriboc-white.png" alt="Nutri.bcg" height={48} width={66} style={{ height: 48, width: 'auto' }} />
             <p>
-              Nut. Brenda Coloccini — Licenciada en Nutrición. MN 13985 · MP 8362.
+              NutriBCG Brenda Coloccini — Licenciada en Nutrición. MN 13985 · MP 8362.
               Acompañamiento nutricional profesional y cercano.
             </p>
           </div>

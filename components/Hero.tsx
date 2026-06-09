@@ -12,7 +12,7 @@ export async function Hero() {
       <div className="wrap hero-inner">
         <div className="hero-text">
           <span className="eyebrow">Licenciada en Nutrición</span>
-          <h1>Nut. Brenda<br />Coloccini</h1>
+          <h1>NutriBCG Brenda<br />Coloccini</h1>
           <div className="hero-badges">
             <span className="badge">MN 13985</span>
             <span className="badge">MP 8362</span>
