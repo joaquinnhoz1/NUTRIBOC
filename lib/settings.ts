@@ -13,6 +13,11 @@ export const SETTING_KEYS = [
   'slots_presencial',
   'slots_online',
   'min_days_ahead',
+  'booking_hold_minutes',
+  'business_hours',
+  'business_hours_detail',
+  'stat_experience',
+  'stat_patients',
 ] as const
 
 export type SettingKey = typeof SETTING_KEYS[number]
@@ -30,6 +35,11 @@ const ENV_DEFAULTS: Record<string, string> = {
   slots_presencial: '["09:00","10:00","11:00","12:00","15:00","16:00","17:00","18:00"]',
   slots_online: '["08:00","09:00","13:00","14:00","19:00","20:00"]',
   min_days_ahead: '1',
+  booking_hold_minutes: '30',
+  business_hours: 'Lun a Sáb · 09 a 20 hs',
+  business_hours_detail: 'Online y presencial',
+  stat_experience: '10',
+  stat_patients: '800',
 }
 
 export async function getSettings(): Promise<Record<string, string>> {

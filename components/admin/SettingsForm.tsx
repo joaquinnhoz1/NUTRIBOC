@@ -13,6 +13,8 @@ export function SettingsForm({ settings }: Props) {
   // Contact settings
   const [waNumber, setWaNumber] = useState(settings.whatsapp_number || '')
   const [waComprobante, setWaComprobante] = useState(settings.whatsapp_comprobante || '')
+  const [businessHours, setBusinessHours] = useState(settings.business_hours || 'Lun a Sáb · 09 a 20 hs')
+  const [businessHoursDetail, setBusinessHoursDetail] = useState(settings.business_hours_detail || 'Online y presencial')
 
   // Bank transfer settings
   const [cbu, setCbu] = useState(settings.transfer_cbu || '')
@@ -24,6 +26,7 @@ export function SettingsForm({ settings }: Props) {
 
   // Agenda
   const [minDaysAhead, setMinDaysAhead] = useState(settings.min_days_ahead || '1')
+  const [holdMinutes, setHoldMinutes] = useState(settings.booking_hold_minutes || '30')
   const [savingAgenda, setSavingAgenda] = useState(false)
   const [msgAgenda, setMsgAgenda] = useState('')
   const [errAgenda, setErrAgenda] = useState('')
@@ -33,6 +36,13 @@ export function SettingsForm({ settings }: Props) {
   const [savingMp, setSavingMp] = useState(false)
   const [msgMp, setMsgMp] = useState('')
   const [errMp, setErrMp] = useState('')
+
+  // Stats
+  const [statExp, setStatExp] = useState(settings.stat_experience || '10')
+  const [statPat, setStatPat] = useState(settings.stat_patients || '800')
+  const [savingStats, setSavingStats] = useState(false)
+  const [msgStats, setMsgStats] = useState('')
+  const [errStats, setErrStats] = useState('')
 
   // Password change
   const [currentPwd, setCurrentPwd] = useState('')
@@ -55,7 +65,12 @@ export function SettingsForm({ settings }: Props) {
     const res = await fetch('/api/admin/settings', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ whatsapp_number: waNumber, whatsapp_comprobante: waComprobante }),
+      body: JSON.stringify({
+        whatsapp_number: waNumber,
+        whatsapp_comprobante: waComprobante,
+        business_hours: businessHours,
+        business_hours_detail: businessHoursDetail,
+      }),
     })
     setSavingContact(false)
     if (res.ok) { setMsgContact('Guardado correctamente'); router.refresh() }
@@ -88,7 +103,7 @@ export function SettingsForm({ settings }: Props) {
     const res = await fetch('/api/admin/settings', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ min_days_ahead: minDaysAhead }),
+      body: JSON.stringify({ min_days_ahead: minDaysAhead, booking_hold_minutes: holdMinutes }),
     })
     setSavingAgenda(false)
     if (res.ok) { setMsgAgenda('Guardado correctamente'); router.refresh() }
@@ -106,6 +121,19 @@ export function SettingsForm({ settings }: Props) {
     setSavingMp(false)
     if (res.ok) { setMsgMp('Guardado correctamente'); router.refresh() }
     else setErrMp('Error al guardar')
+  }
+
+  async function saveStats(e: React.FormEvent) {
+    e.preventDefault()
+    setSavingStats(true); setMsgStats(''); setErrStats('')
+    const res = await fetch('/api/admin/settings', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ stat_experience: statExp, stat_patients: statPat }),
+    })
+    setSavingStats(false)
+    if (res.ok) { setMsgStats('Guardado correctamente'); router.refresh() }
+    else setErrStats('Error al guardar')
   }
 
   async function savePwd(e: React.FormEvent) {
@@ -140,20 +168,18 @@ export function SettingsForm({ settings }: Props) {
       <div className="adm-card">
         <h2>📱 Contacto del sitio</h2>
         <p style={{ fontSize: 13.5, color: '#5C584B', marginBottom: 22 }}>
-          Estos números aparecen en la web y en el botón flotante de WhatsApp.
+          Números de WhatsApp y horario de atención que aparecen en la sección Contacto.
         </p>
         <form onSubmit={saveContact}>
           <div className="adm-settings-grid">
             <div className="adm-filter-group">
               <label>WhatsApp del sitio (contacto público)</label>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                <input
-                  value={waNumber}
-                  onChange={e => setWaNumber(e.target.value)}
-                  placeholder="Ej: 542314541335"
-                  className="adm-input"
-                />
-              </div>
+              <input
+                value={waNumber}
+                onChange={e => setWaNumber(e.target.value)}
+                placeholder="Ej: 542314541335"
+                className="adm-input"
+              />
               <span style={{ fontSize: 12, color: '#8a8780' }}>
                 Link generado: wa.me/{formatWA(waNumber)}
               </span>
@@ -167,7 +193,31 @@ export function SettingsForm({ settings }: Props) {
                 className="adm-input"
               />
               <span style={{ fontSize: 12, color: '#8a8780' }}>
-                A este número llegan los comprobantes de transferencia. Puede ser el mismo u otro.
+                A este número llegan los comprobantes de transferencia.
+              </span>
+            </div>
+            <div className="adm-filter-group">
+              <label>Horario de atención</label>
+              <input
+                value={businessHours}
+                onChange={e => setBusinessHours(e.target.value)}
+                placeholder="Lun a Sáb · 09 a 20 hs"
+                className="adm-input"
+              />
+              <span style={{ fontSize: 12, color: '#8a8780' }}>
+                Primera línea del horario en la sección Contacto.
+              </span>
+            </div>
+            <div className="adm-filter-group">
+              <label>Detalle del horario</label>
+              <input
+                value={businessHoursDetail}
+                onChange={e => setBusinessHoursDetail(e.target.value)}
+                placeholder="Online y presencial"
+                className="adm-input"
+              />
+              <span style={{ fontSize: 12, color: '#8a8780' }}>
+                Segunda línea debajo del horario.
               </span>
             </div>
           </div>
@@ -242,24 +292,41 @@ export function SettingsForm({ settings }: Props) {
       <div className="adm-card">
         <h2>📅 Agenda</h2>
         <p style={{ fontSize: 13.5, color: '#5C584B', marginBottom: 22 }}>
-          Configurá con cuántos días de anticipación mínima se puede reservar un turno.
+          Configurá los tiempos de anticipación y vencimiento de reservas.
         </p>
         <form onSubmit={saveAgenda}>
-          <div className="adm-filter-group" style={{ maxWidth: 320 }}>
-            <label>Días mínimos de anticipación</label>
-            <input
-              type="number"
-              value={minDaysAhead}
-              onChange={e => setMinDaysAhead(e.target.value)}
-              min="0"
-              max="30"
-              className="adm-input"
-            />
-            <span style={{ fontSize: 12, color: '#8a8780' }}>
-              {minDaysAhead === '0' ? 'El paciente puede reservar para hoy mismo.' :
-               minDaysAhead === '1' ? 'El paciente puede reservar a partir de mañana.' :
-               `El paciente puede reservar con ${minDaysAhead} días de anticipación mínima.`}
-            </span>
+          <div className="adm-settings-grid">
+            <div className="adm-filter-group">
+              <label>Días mínimos de anticipación</label>
+              <input
+                type="number"
+                value={minDaysAhead}
+                onChange={e => setMinDaysAhead(e.target.value)}
+                min="0"
+                max="30"
+                className="adm-input"
+              />
+              <span style={{ fontSize: 12, color: '#8a8780' }}>
+                {minDaysAhead === '0' ? 'El paciente puede reservar para hoy mismo.' :
+                 minDaysAhead === '1' ? 'El paciente puede reservar a partir de mañana.' :
+                 `El paciente puede reservar con ${minDaysAhead} días de anticipación mínima.`}
+              </span>
+            </div>
+            <div className="adm-filter-group">
+              <label>Vencimiento de reservas pendientes (minutos)</label>
+              <input
+                type="number"
+                value={holdMinutes}
+                onChange={e => setHoldMinutes(e.target.value)}
+                min="5"
+                max="1440"
+                className="adm-input"
+              />
+              <span style={{ fontSize: 12, color: '#8a8780' }}>
+                {holdMinutes === '30' ? 'El turno se libera a los 30 minutos si no se confirma el pago.' :
+                 `El turno se libera a los ${holdMinutes} minutos si no se confirma el pago.`}
+              </span>
+            </div>
           </div>
           <div className="adm-settings-actions" style={{ marginTop: 16 }}>
             <button type="submit" className="adm-btn-primary" disabled={savingAgenda}>
@@ -296,6 +363,51 @@ export function SettingsForm({ settings }: Props) {
             </button>
             {msgMp && <span className="adm-msg-ok">✓ {msgMp}</span>}
             {errMp && <span className="adm-error" style={{ display: 'inline' }}>{errMp}</span>}
+          </div>
+        </form>
+      </div>
+
+      {/* ── Stats ── */}
+      <div className="adm-card">
+        <h2>📊 Estadísticas del Hero</h2>
+        <p style={{ fontSize: 13.5, color: '#5C584B', marginBottom: 22 }}>
+          Números que aparecen en la página principal debajo de los botones.
+        </p>
+        <form onSubmit={saveStats}>
+          <div className="adm-settings-grid">
+            <div className="adm-filter-group">
+              <label>Años de experiencia</label>
+              <input
+                type="number"
+                value={statExp}
+                onChange={e => setStatExp(e.target.value)}
+                min="0"
+                className="adm-input"
+              />
+              <span style={{ fontSize: 12, color: '#8a8780' }}>
+                Se muestra como &quot;+{statExp} años de experiencia&quot;.
+              </span>
+            </div>
+            <div className="adm-filter-group">
+              <label>Pacientes acompañados</label>
+              <input
+                type="number"
+                value={statPat}
+                onChange={e => setStatPat(e.target.value)}
+                min="0"
+                className="adm-input"
+              />
+              <span style={{ fontSize: 12, color: '#8a8780' }}>
+                Se muestra como &quot;+{statPat} pacientes acompañados&quot;.
+              </span>
+            </div>
+          </div>
+          <div className="adm-settings-actions" style={{ marginTop: 16 }}>
+            <button type="submit" className="adm-btn-primary" disabled={savingStats}>
+              {savingStats ? 'Guardando…' : 'Guardar estadísticas'}
+            </button>
+            {msgStats && <span className="adm-msg-ok">✓ {msgStats}</span>}
+            {errStats && <span className="adm-error" style={{ display: 'inline' }}>{errStats}</span>}
           </div>
         </form>
       </div>

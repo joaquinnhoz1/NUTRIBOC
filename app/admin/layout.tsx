@@ -3,7 +3,7 @@ import '../globals.css'
 import './admin.css'
 import { AdminNav } from '@/components/admin/AdminNav'
 
-export const metadata: Metadata = { title: 'Panel Admin — NUTRIBOC' }
+export const metadata: Metadata = { title: 'Panel Admin — Nutri.bcg' }
 
 export const dynamic = 'force-dynamic'
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

@@ -18,7 +18,7 @@ const outfit = Outfit({
 })
 
 export const metadata: Metadata = {
-  title: 'Nut. Brenda Coloccini — Nutrición & Bienestar | NUTRIBOC',
+  title: 'Nut. Brenda Coloccini — Nutrición & Bienestar | Nutri.bcg',
   description:
     'Nut. Brenda Coloccini, Licenciada en Nutrición. Acompañamiento nutricional cálido y profesional. Planes personalizados, consultas online y presenciales. Reservá tu turno.',
   openGraph: {

@@ -27,7 +27,7 @@ export default function AdminLogin() {
     <div className="adm-login">
       <div className="adm-login-card">
         <div className="adm-login-logo">NB</div>
-        <h1>Panel NUTRIBOC</h1>
+        <h1>Panel Nutri.bcg</h1>
         <p>Ingresá tu contraseña de administrador</p>
         <form onSubmit={handleSubmit}>
           <input

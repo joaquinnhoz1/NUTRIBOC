@@ -59,6 +59,11 @@ export async function PUT(req: NextRequest) {
     'slots_presencial',
     'slots_online',
     'min_days_ahead',
+    'booking_hold_minutes',
+    'business_hours',
+    'business_hours_detail',
+    'stat_experience',
+    'stat_patients',
   ]
 
   const toSave: Record<string, string> = {}

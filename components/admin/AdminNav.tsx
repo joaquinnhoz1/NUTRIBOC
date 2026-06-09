@@ -23,7 +23,7 @@ export function AdminNav() {
     <aside className="adm-sidebar">
       <div className="adm-sidebar-logo">
         <div className="mark">NB</div>
-        <span>NUTRIBOC<small>Panel Admin</small></span>
+        <span>Nutri.bcg<small>Panel Admin</small></span>
       </div>
       <nav className="adm-nav">
         <div className="adm-nav-label">Menú</div>

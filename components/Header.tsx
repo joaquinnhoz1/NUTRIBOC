@@ -20,17 +20,15 @@ export function Header() {
       <header className={scrolled ? 'scrolled' : ''}>
         <div className="wrap nav">
           <a className="brand" href="#inicio">
-            <Image src="/nutriboc-black.png" alt="NUTRIBOC" height={40} width={55} style={{ height: 40, width: 'auto' }} />
+            <Image src="/nutriboc-black.png" alt="Nutri.bcg" height={40} width={55} style={{ height: 40, width: 'auto' }} />
             <span>
-              <span className="bt">Brenda Coloccini</span>
-              <span className="bs">Nutrición &amp; Bienestar</span>
+              <span className="bt">B. Coloccini</span>
+              <span className="bs">Nutrición</span>
             </span>
           </a>
           <nav className="menu">
             <a href="#como">Cómo funciona</a>
             <a href="#agenda">Agenda</a>
-            <a href="#pagos">Pagos</a>
-            <a href="#contacto">Contacto</a>
           </nav>
           <a href="#agenda" className="btn btn-primary">Reservar turno</a>
           <button
@@ -48,8 +46,6 @@ export function Header() {
       <div className={`mobile-menu${menuOpen ? ' open' : ''}`}>
         <a href="#como" onClick={closeMenu}>Cómo funciona</a>
         <a href="#agenda" onClick={closeMenu}>Agenda</a>
-        <a href="#pagos" onClick={closeMenu}>Pagos</a>
-        <a href="#contacto" onClick={closeMenu}>Contacto</a>
         <a href="#agenda" className="btn btn-primary" onClick={closeMenu}>Reservar turno</a>
       </div>
     </>

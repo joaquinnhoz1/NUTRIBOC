@@ -31,6 +31,8 @@ export function BookingActions({ booking }: Props) {
   useEffect(() => {
     if (booking.status !== 'cancelled') return
 
+    setCountdown(DELETE_AFTER)
+
     // Countdown tick
     timerRef.current = setInterval(() => {
       setCountdown(s => (s !== null ? s - 1 : null))

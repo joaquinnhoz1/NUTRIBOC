@@ -2,43 +2,97 @@ import { getSetting } from '@/lib/settings'
 
 function WhatsAppIcon() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
       <path d="M.057 24l1.687-6.163a11.867 11.867 0 0 1-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 0 1 8.413 3.488 11.824 11.824 0 0 1 3.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 0 1-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 0 0 1.512 5.26l-.999 3.648 3.476-1.607zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.078 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
+    </svg>
+  )
+}
+
+function PhoneIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.39 2 2 0 0 1 3.6 1.21h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.83a16 16 0 0 0 6.29 6.29l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
+    </svg>
+  )
+}
+
+function MapPinIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+      <circle cx="12" cy="10" r="3" />
+    </svg>
+  )
+}
+
+function ClockIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="12" cy="12" r="10" />
+      <polyline points="12 6 12 12 16 14" />
     </svg>
   )
 }
 
 function formatPhoneDisplay(number: string) {
   const digits = number.replace(/\D/g, '')
-  // Strip country code 54 for display
   const local = digits.startsWith('54') ? digits.slice(2) : digits
-  // Format as XXXX XXXXXX if 10 digits
   if (local.length === 10) return `${local.slice(0, 4)} ${local.slice(4)}`
   return local
 }
 
 export async function Contact() {
-  const waNumber = await getSetting('whatsapp_number')
+  const [waNumber, businessHours, businessHoursDetail] = await Promise.all([
+    getSetting('whatsapp_number'),
+    getSetting('business_hours'),
+    getSetting('business_hours_detail'),
+  ])
+  const display = formatPhoneDisplay(waNumber)
 
   return (
     <section className="section contact" id="contacto">
-      <div className="blob" style={{ width: 360, height: 360, background: 'rgba(255,255,255,.07)', top: -90, right: -60 }} />
-      <div className="blob" style={{ width: 300, height: 300, background: 'rgba(255,255,255,.05)', bottom: -90, left: -50 }} />
       <div className="wrap contact-inner">
-        <span className="eyebrow">Contacto</span>
-        <h2>¿Empezamos <em>ahora</em>?</h2>
-        <p>
-          Escribime por WhatsApp para coordinar tu primera consulta o evacuar cualquier duda. Te respondo a la brevedad.
-        </p>
-        <a
-          href={`https://wa.me/${waNumber.replace(/\D/g, '')}`}
-          className="wa"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <WhatsAppIcon />
-          WhatsApp · {formatPhoneDisplay(waNumber)}
-        </a>
+        <div className="contact-left">
+          <span className="eyebrow">Contacto</span>
+          <h2>¿Empezamos ahora?</h2>
+          <p>
+            Escribime por WhatsApp para evacuar dudas o coordinar tu primera consulta. Te respondo a la brevedad.
+          </p>
+          <a
+            href={`https://wa.me/${waNumber.replace(/\D/g, '')}`}
+            className="wa"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <WhatsAppIcon />
+            {display}
+          </a>
+        </div>
+        <div className="contact-right">
+          <div className="contact-card">
+            <div className="contact-info-row">
+              <div className="contact-info-icon"><PhoneIcon /></div>
+              <div className="contact-info-text">
+                <strong>{display}</strong>
+                <span>WhatsApp y llamadas</span>
+              </div>
+            </div>
+            <div className="contact-info-row">
+              <div className="contact-info-icon"><MapPinIcon /></div>
+              <div className="contact-info-text">
+                <strong>Consultorio céntrico</strong>
+                <span>Atención presencial con turno</span>
+              </div>
+            </div>
+            <div className="contact-info-row">
+              <div className="contact-info-icon"><ClockIcon /></div>
+              <div className="contact-info-text">
+                <strong>{businessHours}</strong>
+                <span>{businessHoursDetail}</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   )

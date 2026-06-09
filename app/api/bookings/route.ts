@@ -3,7 +3,6 @@ import { prisma } from '@/lib/db'
 import { getAdminFromCookies } from '@/lib/auth'
 import { getSetting } from '@/lib/settings'
 
-const HOLD_MINUTES = 30
 
 export async function GET(req: NextRequest) {
   const isAdmin = await getAdminFromCookies()
@@ -70,9 +69,10 @@ export async function POST(req: NextRequest) {
   const status = paymentType === 'transfer' ? 'pending_transfer' : 'pending_mp'
 
   const feeKey = paymentType === 'transfer' ? 'consultation_fee' : 'consultation_fee_mp'
-  const feeRaw = await getSetting(feeKey)
+  const [feeRaw, holdRaw] = await Promise.all([getSetting(feeKey), getSetting('booking_hold_minutes')])
   const amount = parseFloat(feeRaw || process.env.NEXT_PUBLIC_CONSULTATION_FEE || '5000')
-  const expiresAt = new Date(now.getTime() + HOLD_MINUTES * 60 * 1000)
+  const holdMinutes = parseInt(holdRaw || '30') || 30
+  const expiresAt = new Date(now.getTime() + holdMinutes * 60 * 1000)
 
   const booking = await prisma.booking.create({
     data: { name, email, phone, mode, date, slot, paymentType, status, amount, expiresAt },

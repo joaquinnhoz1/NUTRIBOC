@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Single-page landing site + booking system for **Nut. Brenda Coloccini (NUTRIBOC)**, a nutritionist. Built with Next.js 15 App Router + Tailwind CSS v4 + Prisma 5 + SQLite.
+Single-page landing site + booking system for **Nut. Brenda Coloccini (Nutri.bcg)**, a nutritionist. Built with Next.js 15 App Router + Tailwind CSS v4 + Prisma 5 + SQLite.
 
 ## Commands
 
@@ -65,32 +65,76 @@ Server-rendered single page. Sections: `Header`, `Hero`, `HowItWorks`, `Agenda` 
 - **Fonts:** Newsreader (serif, `--font-newsreader`) + Outfit (sans, `--font-outfit`) via `next/font/google`.
 
 ### Booking flow (`components/BookingCalendar.tsx`)
-Client component with 5 steps: `select` → `form` → `payment` (transfer) → `transfer-sent` or redirect to Mercado Pago. On mount fetches `/api/settings` to get live bank data and WhatsApp numbers (not hardcoded env vars).
+Client component with 5 steps: `select` → `form` → `payment` (transfer) → `transfer-sent` or redirect to Mercado Pago. On mount fetches `/api/settings` to get live settings (bank data, WhatsApp numbers, prices, MP link, min_days_ahead).
+
+- **Mercado Pago button** only renders if `settings.mp_link` is set. If empty, only transfer is shown.
+- **Dual pricing:** transfer uses `consultation_fee`, MP uses `consultation_fee_mp`. Each price shown inside its button.
+- **Minimum booking lead time:** `min_days_ahead` setting controls how many days ahead patients must book (default: 1 = tomorrow onwards). Days before that threshold are disabled in the calendar.
+- **Booking hold:** on creation, `pending_transfer` and `pending_mp` bookings get `expiresAt = now + 30min`. The slot is blocked for 30 minutes. If not confirmed, it auto-cancels on the next availability query for that date/mode.
 
 ### Settings system (`lib/settings.ts`)
-All configurable values (WhatsApp numbers, bank transfer data, consultation fee, admin password) live in the `Setting` model (key/value). `getSettings()` merges DB rows over `.env.local` defaults. Server components call `getSetting(key)` directly; client components fetch `/api/settings` (public, read-only).
+All configurable values live in the `Setting` model (key/value). `getSettings()` merges DB rows over `.env.local` defaults. Server components call `getSetting(key)` directly; client components fetch `/api/settings` (public, read-only).
+
+**All setting keys:**
+| Key | Default | Description |
+|---|---|---|
+| `whatsapp_number` | env | Public WhatsApp on the site and FAB button |
+| `whatsapp_comprobante` | env | WhatsApp that receives transfer receipts |
+| `transfer_cbu` | env | Bank CBU |
+| `transfer_alias` | env | Bank alias |
+| `transfer_titular` | env | Account holder name |
+| `transfer_banco` | env | Bank name |
+| `consultation_fee` | env | Price for transfer payment |
+| `consultation_fee_mp` | env | Price for Mercado Pago payment |
+| `mp_link` | `''` | Fixed MP payment link. If set, used instead of SDK preference. If empty, MP button is hidden. |
+| `slots_presencial` | JSON array | Available time slots for presencial mode |
+| `slots_online` | JSON array | Available time slots for online mode |
+| `min_days_ahead` | `'1'` | Minimum days in advance a patient can book (0 = same day, 1 = tomorrow, etc.) |
 
 ### Admin panel (`/admin/*`)
 Protected by `middleware.ts` via JWT cookie (`admin_token`, 24h, `jose` HS256). Default password: `nutriboc2026` (overridden by DB `admin_password` setting). Login at `/admin/login`.
 
-Pages: Dashboard (`/admin`), Reservas (`/admin/bookings`), Horarios y bloqueos (`/admin/schedule`), Configuración (`/admin/settings`).
+**Pages:**
+- **Dashboard** (`/admin`) — stats cards + upcoming bookings list
+- **Reservas** (`/admin/bookings`) — full booking table with filters. Also shows manually blocked slots (BlockedSlot with `slot !== 'all'`) as rows with a "🔒 Bloqueado" badge and a "Desbloquear" button. Cancelled bookings auto-delete after 30 seconds with a visible countdown on the "Restaurar" button.
+- **Horarios y bloqueos** (`/admin/schedule`) — three sections:
+  - **SlotEditor** (`components/admin/SlotEditor.tsx`) — add/remove individual time slots per mode (presencial/online). Stored as JSON in settings.
+  - **BlockDayManager** — block entire days
+  - **BlockSlotManager** — block specific slots on specific dates (these appear in Reservas table)
+- **Configuración** (`/admin/settings`) — editable sections:
+  - 📱 Contacto (WhatsApp numbers)
+  - 🏦 Datos bancarios y precio (CBU, alias, titular, banco, price for transfer, price for MP)
+  - 📅 Agenda (min_days_ahead)
+  - 💳 Mercado Pago (mp_link)
+  - 🔒 Cambiar contraseña
 
 Admin API routes all verify `getAdminFromCookies()` from `lib/auth.ts`.
 
 ### Database models (Prisma 5 + SQLite)
-- **Booking** — patient name/email/phone, mode (`presencial`|`online`), date (YYYY-MM-DD string), slot (HH:MM), paymentType (`transfer`|`mercadopago`), status (`pending`|`pending_transfer`|`pending_mp`|`confirmed`|`cancelled`), MP payment/preference IDs
-- **BlockedSlot** — blocks a specific slot on a date for a mode (or `mode: 'both'`, `slot: 'all'`)
+- **Booking** — patient name/email/phone, mode (`presencial`|`online`), date (YYYY-MM-DD string), slot (HH:MM), paymentType (`transfer`|`mercadopago`), status (`pending`|`pending_transfer`|`pending_mp`|`confirmed`|`cancelled`), MP payment/preference IDs, amount (Float), `expiresAt` (DateTime?, set to now+30min on pending bookings, cleared on confirm)
+- **BlockedSlot** — blocks a specific slot on a date for a mode (or `mode: 'both'`, `slot: 'all'`). Slots with `slot !== 'all'` appear in the Reservas admin table.
 - **BlockedDay** — blocks an entire day (unique date)
 - **Setting** — key/value store for runtime configuration
 
 ### Availability logic (`app/api/availability/route.ts`)
-Hardcoded slot lists: presencial `['09:00','10:00','11:00','12:00','15:00','16:00','17:00','18:00']`, online `['08:00','09:00','13:00','14:00','19:00','20:00']`. Excludes blocked days, blocked slots, and bookings with status `pending_transfer | confirmed | pending_mp`.
+Slot lists are read from DB settings (`slots_presencial`, `slots_online`), falling back to hardcoded defaults. Before computing available slots, lazily cancels any expired `pending_transfer`/`pending_mp` bookings for the queried date+mode (`expiresAt <= now`). Excludes blocked days, blocked slots, and active bookings (`pending_transfer | confirmed | pending_mp`).
 
 ### Mercado Pago
-- Preference created at `/api/mp/preference` — sets `external_reference` to `bookingId`
+- **Fixed link mode (preferred):** if `mp_link` setting is set, patients are redirected directly to that URL. No SDK call needed.
+- **SDK mode (fallback):** if `mp_link` is empty, calls `/api/mp/preference` to create a preference. Requires `MP_ACCESS_TOKEN` in env.
 - Webhook at `/api/mp/webhook` — maps MP payment status to booking status (`approved→confirmed`, `pending→pending_mp`, `rejected/cancelled→cancelled`)
 - After successful MP payment, MP redirects to `/reserva/exito` or `/reserva/pendiente`
 - `lib/mercadopago.ts` wraps the `mercadopago` SDK
+
+### Booking expiry (30-minute hold)
+When a booking is created with `pending_transfer` or `pending_mp`, `expiresAt` is set to `now + 30 minutes`. The slot is blocked during that window. Expiry is handled **lazily**:
+- On `/api/availability` query: expired bookings for that date+mode are cancelled before computing slots.
+- On `/api/bookings` POST: expired bookings for that slot are cancelled before the conflict check.
+
+When admin confirms a booking via PATCH, `expiresAt` is set to `null` so it never auto-cancels.
+
+### Cancelled booking auto-delete (admin)
+In `BookingActions.tsx`, when a booking has `status: 'cancelled'`, a 30-second countdown starts. The "Restaurar" button shows the remaining seconds. At 0, the booking is hard-deleted via `DELETE /api/bookings/[id]`. Clicking "Restaurar" before countdown ends cancels the timer and sets the booking to `confirmed`.
 
 ### Route protection
 `middleware.ts` protects all `/admin/*` except `/admin/login`. Verifies JWT from `admin_token` cookie; redirects to login on failure.
@@ -98,15 +142,18 @@ Hardcoded slot lists: presencial `['09:00','10:00','11:00','12:00','15:00','16:0
 ### Key API routes
 | Route | Method | Auth | Purpose |
 |---|---|---|---|
-| `/api/availability` | GET | public | available slots for date+mode |
-| `/api/bookings` | POST | public | create booking |
-| `/api/bookings/[id]` | PATCH | public | update booking status |
+| `/api/availability` | GET | public | available slots for date+mode (lazy-expires pending bookings) |
+| `/api/bookings` | POST | public | create booking (sets expiresAt, lazy-expires conflicting bookings) |
+| `/api/bookings/[id]` | PATCH | admin | update booking status (clears expiresAt on confirm) |
+| `/api/bookings/[id]` | DELETE | admin | hard-delete booking from DB |
 | `/api/settings` | GET | public | read-only site settings for client |
 | `/api/auth/login` | POST | — | issue JWT cookie |
 | `/api/auth/logout` | POST | — | clear cookie |
 | `/api/admin/settings` | GET/PUT | admin | full settings CRUD + password change |
 | `/api/admin/stats` | GET | admin | dashboard statistics |
 | `/api/admin/block-slot` | GET/POST | admin | manage blocked slots |
+| `/api/admin/block-slot/[id]` | DELETE | admin | remove a blocked slot |
 | `/api/admin/block-day` | GET/POST | admin | manage blocked days |
-| `/api/mp/preference` | POST | public | create MP payment preference |
+| `/api/admin/block-day/[id]` | DELETE | admin | remove a blocked day |
+| `/api/mp/preference` | POST | public | create MP payment preference (SDK mode) |
 | `/api/mp/webhook` | POST/GET | public | MP payment events |

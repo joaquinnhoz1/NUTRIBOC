@@ -46,7 +46,7 @@ export async function createPreference(booking: BookingDetails) {
       auto_return: 'approved',
       notification_url: `${baseUrl}/api/mp/webhook`,
       external_reference: booking.bookingId,
-      statement_descriptor: 'NUTRIBOC',
+      statement_descriptor: 'Nutri.bcg',
     },
   })
 
