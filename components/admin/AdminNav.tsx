@@ -13,11 +13,14 @@ const links = [
 export function AdminNav() {
   const pathname = usePathname()
   const router = useRouter()
+  const isLogin = pathname === '/admin/login'
 
   async function logout() {
     await fetch('/api/auth/logout', { method: 'POST' })
     router.push('/admin/login')
   }
+
+  if (isLogin) return null
 
   return (
     <>
