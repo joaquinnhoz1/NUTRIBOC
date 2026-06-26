@@ -191,7 +191,7 @@
 .adm-filter-group { display: flex; flex-direction: column }
 
 /* Table */
-.adm-table-wrap { background: #fff; border-radius: 16px; border: 1px solid #eee; overflow: hidden }
+.adm-table-wrap { background: #fff; border-radius: 16px; border: 1px solid #eee; overflow-x: auto; overflow-y: hidden }
 .adm-table { width: 100%; border-collapse: collapse; font-size: 14px }
 .adm-table th {
   background: #f9f8f6;
