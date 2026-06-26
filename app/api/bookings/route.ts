@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { getAdminFromCookies } from '@/lib/auth'
 import { getSetting } from '@/lib/settings'
+import { sendBookingNotification } from '@/lib/email'
 
 // ── Validation helpers ──────────────────────────────────────────────────────
 
@@ -138,6 +139,18 @@ export async function POST(req: NextRequest) {
         },
       })
     })
+
+    // Enviar notificación a Brenda sin bloquear la respuesta al paciente
+    sendBookingNotification({
+      name:        booking.name,
+      email:       booking.email,
+      phone:       booking.phone,
+      mode:        booking.mode,
+      date:        booking.date,
+      slot:        booking.slot,
+      paymentType: booking.paymentType,
+      amount:      booking.amount ?? 0,
+    }).catch(err => console.error('[email] Error enviando notificación:', err))
 
     return NextResponse.json(booking, { status: 201 })
   } catch (err: unknown) {
