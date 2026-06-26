@@ -140,8 +140,7 @@ export async function POST(req: NextRequest) {
       })
     })
 
-    // Enviar notificación a Brenda sin bloquear la respuesta al paciente
-    sendBookingNotification({
+    await sendBookingNotification({
       name:        booking.name,
       email:       booking.email,
       phone:       booking.phone,
